@@ -5,6 +5,7 @@ const Posts = require('../schemas/post')
 
 const router = express.Router()
 
+//All comments
 router.get('/comments', async (req, res) => {
     const comments = await Comments.find({}, { postId: 1, user: 1, comment: 1 }).sort({ createdAt: -1 })
     const postId = comments.map(comment => comment.postId)
@@ -20,6 +21,8 @@ router.get('/comments', async (req, res) => {
     })
 })
 
+
+//Specific from postId
 router.get('/comments/:postId', async (req, res) => {
     const comments = await Comments.find({}, { postId: 1, user: 1, comment: 1 }).sort({ createdAt: -1 })
     const { postId } = req.params
@@ -57,13 +60,16 @@ router.put('/comments/:_id', async (req, res) => {
     const { _id } = req.params
     const { password, comment } = req.body
     const data = await Comments.findOne({ _id: _id })
-    const passwordcomment = data.password
+
+    if (!data) {
+        return res.status(400).json({errorMessage: "Data not found"})
+    }
 
     if (!comment) {
         return res.json({ errorMessage: "Please enter the comment content" })
     }
 
-    if (password !== passwordcomment) {
+    if (password !== data.password) {
         return res.json({ errorMessage: "Auth failed" })
     }
 
