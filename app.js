@@ -1,7 +1,6 @@
 const express = require('express');
 
-const postsRouter = require('./routes/posts')
-const commentsRouter = require('./routes/comments')
+const Router = require('./routes')
 
 const connect = require("./schemas");
 connect();
@@ -11,7 +10,7 @@ const port = 3001;
 
 app.use(express.json())
 
-app.use('/api', [postsRouter, commentsRouter])
+app.use('/api', Router)
 
 app.listen(process.env.PORT || 5000, () => {
     console.log(port, 'Server is open with port!');
