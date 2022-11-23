@@ -78,9 +78,14 @@ router.delete('/posts/:postId', async(req, res) => {
     const {postId} = req.params
     const {password} = req.body
     const post = await Posts.findOne({ postId: +postId }, { postId: 1, title: 1, content:1, user: 1, createdAt: 1, password:1 })
-    const passwordpost = post.password
+    
+    if (!post) {
+        return res.status(400).json({
+            errorMessage: "Data not found"
+        })
+    } 
 
-    if (password !== passwordpost) {
+    if (password !== post.password) {
         return res.json({
             errorMessage: "Auth failed"
         })

@@ -20,7 +20,21 @@ router.get('/comments', async (req, res) => {
     })
 })
 
-router.post('/post/:postId/comments', async (req, res) => {
+router.get('/comments/:postId', async (req, res) => {
+    const comments = await Comments.find({}, { postId: 1, user: 1, comment: 1 }).sort({ createdAt: -1 })
+    const { postId } = req.params
+    const posts = await Posts.find({ postId: postId })
+    const result = posts.map(post => {
+        return {
+            comments: comments.filter(comment => comment.postId === post.postId)
+        }
+    })
+    res.json({
+        data: result
+    })
+})
+
+router.post('/comments/:postId', async (req, res) => {
     const { postId } = req.params
     const { user, password, comment } = req.body
 
@@ -39,8 +53,9 @@ router.post('/post/:postId/comments', async (req, res) => {
     })
 })
 
-router.put('/post/:postId/comments', async (req, res) => {
-    const { _id, password, comment } = req.body
+router.put('/comments/:_id', async (req, res) => {
+    const { _id } = req.params
+    const { password, comment } = req.body
     const data = await Comments.findOne({ _id: _id })
     const passwordcomment = data.password
 
@@ -66,17 +81,22 @@ router.put('/post/:postId/comments', async (req, res) => {
     })
 })
 
-router.delete('/post/:postId/comments', async (req, res) => {
-    const { _id, password } = req.body
+router.delete('/comments/:_id', async (req, res) => {
+    const { _id } = req.params
+    const { password } = req.body
     const data = await Comments.findOne({ _id: _id })
-    const passwordcomment = data.password
 
-    if (password !== passwordcomment) {
-        return res.json({ errorMessage: "Auth failed" })
-    }
+    
 
     if (data) {
+        if (password !== data.password) {
+            return res.json({ errorMessage: "Auth failed" })
+        }
         await Comments.deleteOne({ _id: _id })
+    } else {
+        return res.status(400).json({
+            errorMessage: "Data not found"
+        })
     }
     return res.json({
         result: 'success',
