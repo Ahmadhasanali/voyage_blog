@@ -6,12 +6,12 @@ const connect = require("./schemas");
 connect();
 
 const app = express();
-const port = 3001;
+const port = 3000;
 
 app.use(express.json())
 
 app.use('/api', Router)
 
-app.listen(process.env.PORT || 5000, () => {
+app.listen(port, () => {
     console.log(port, 'Server is open with port!');
 })
